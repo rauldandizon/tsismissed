@@ -54,33 +54,33 @@ export function CallDialog({
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black/90">
+    <div className="fixed inset-0 z-50 flex flex-col bg-tsismis-bg/95 backdrop-blur-sm animate-in fade-in duration-200">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-gray-900 text-white shrink-0">
-        <div className="flex items-center gap-2">
+      <div className="flex items-center justify-between px-4 py-3 bg-tsismis-sidebar text-tsismis-text border-b border-tsismis-border shrink-0">
+        <div className="flex items-center gap-2.5">
           {callType === "audio" ? (
-            <Phone size={18} className="text-green-400" />
+            <Phone size={18} className="text-tsismis-pink" />
           ) : (
-            <Video size={18} className="text-blue-400" />
+            <Video size={18} className="text-tsismis-pink" />
           )}
-          <span className="text-sm font-medium">
-            {callType === "audio" ? "Audio Call" : "Video Call"}
+          <span className="text-sm font-semibold">
+            {callType === "audio" ? "Voice Call" : "Video Call"}
           </span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <a
             href={callUrl}
             target="_blank"
             rel="noopener noreferrer"
             title="Open in new tab"
-            className="p-1.5 rounded text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+            className="p-1.5 rounded-full text-tsismis-muted hover:text-tsismis-text hover:bg-white/5 transition-all cursor-pointer"
           >
             <ExternalLink size={16} />
           </a>
           <button
             onClick={handleClose}
             title="End call"
-            className="p-1.5 rounded text-gray-400 hover:text-white hover:bg-gray-700 transition-colors"
+            className="p-1.5 rounded-full text-[#FF4D6D] hover:text-[#FF4D6D] hover:bg-[#FF4D6D]/10 transition-all cursor-pointer"
           >
             <X size={18} />
           </button>
@@ -88,26 +88,33 @@ export function CallDialog({
       </div>
 
       {/* Body */}
-      <div className="flex-1 flex items-center justify-center bg-black overflow-hidden">
-        {!joined && mode === "receiver" ? (
-          <div className="flex flex-col items-center gap-4 text-center">
-            <div className="flex items-center justify-center w-16 h-16 rounded-full bg-green-600">
-              {callType === "audio" ? (
-                <Phone size={28} className="text-white" />
-              ) : (
-                <Video size={28} className="text-white" />
-              )}
+      <div className="flex-1 flex items-center justify-center bg-black overflow-hidden relative">
+        {!joined ? (
+          mode === "receiver" ? (
+            <div className="flex flex-col items-center gap-5 text-center p-8 bg-tsismis-surface/40 backdrop-blur border border-tsismis-border rounded-2xl max-w-sm mx-4 animate-in zoom-in-95 duration-250">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-tsismis-gradient shadow-lg shadow-tsismis-pink/15">
+                {callType === "audio" ? (
+                  <Phone size={28} className="text-white" />
+                ) : (
+                  <Video size={28} className="text-white" />
+                )}
+              </div>
+              <div>
+                <p className="text-tsismis-text text-base font-bold">
+                  {callType === "audio" ? "Tawag na Boses" : "Tawag na Video"}
+                </p>
+                <p className="text-tsismis-muted text-xs mt-1">
+                  May tumatawag sa iyo sa TsisMissed...
+                </p>
+              </div>
+              <button
+                onClick={handleJoin}
+                className="px-6 py-2.5 bg-tsismis-gradient hover:opacity-90 active:scale-[0.97] text-white rounded-full text-sm font-semibold transition-all cursor-pointer shadow-lg shadow-tsismis-pink/15"
+              >
+                Sumali sa tawag
+              </button>
             </div>
-            <p className="text-white text-sm">
-              {callType === "audio" ? "Incoming audio call" : "Incoming video call"}
-            </p>
-            <button
-              onClick={handleJoin}
-              className="px-6 py-2.5 bg-green-600 text-white rounded-full text-sm font-medium hover:bg-green-700 transition-colors"
-            >
-              Join Call
-            </button>
-          </div>
+          ) : null
         ) : (
           <iframe
             ref={iframeRef}

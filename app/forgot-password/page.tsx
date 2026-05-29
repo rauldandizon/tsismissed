@@ -28,39 +28,41 @@ export default function ForgotPasswordPage() {
 
   return (
     <AuthForm
-      title="Reset your password"
+      title="Reset Password"
+      chatPreviewType="forgot-password"
       footer={
-        <Link href="/login" className="text-blue-600 hover:underline">Back to sign in</Link>
+        <Link href="/login" className="text-tsismis-pink hover:underline font-semibold">Back to sign in</Link>
       }
     >
       {sent ? (
         <div className="flex flex-col items-center gap-3 py-4 text-center">
-          <CheckCircle size={40} className="text-green-500" />
-          <p className="text-sm text-gray-600">
-            Password reset link sent to <strong>{email}</strong>. Check your inbox.
+          <CheckCircle size={40} className="text-tsismis-cyan animate-in fade-in duration-300" />
+          <p className="text-sm text-tsismis-muted leading-relaxed">
+            Password reset link sent to <strong className="text-tsismis-text">{email}</strong>. Check your inbox.
           </p>
         </div>
       ) : (
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <p className="text-sm text-gray-500">
+          <p className="text-sm text-tsismis-muted">
             Enter your email and we&apos;ll send you a reset link.
           </p>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-semibold text-tsismis-muted mb-1">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              placeholder="tsismosa@example.com"
+              className="w-full bg-tsismis-surface border border-tsismis-border rounded-xl px-4 py-2.5 text-sm text-tsismis-text placeholder:text-tsismis-hint focus:border-tsismis-pink focus:ring-1 focus:ring-tsismis-pink/30 outline-none transition-all"
             />
           </div>
-          {error && <p className="text-sm text-red-500">{error}</p>}
+          {error && <p className="text-sm text-red-400 font-medium">{error}</p>}
           <button
             type="submit"
             disabled={loading}
-            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg px-4 py-2 text-sm disabled:opacity-50"
+            className="flex items-center justify-center gap-2 bg-tsismis-gradient hover:opacity-90 text-white font-semibold rounded-full px-6 py-2.5 text-sm disabled:opacity-50 active:scale-[0.97] transition-all cursor-pointer shadow-lg shadow-tsismis-pink/15"
           >
             {loading && <Loader2 size={14} className="animate-spin" />}
             Send Reset Link

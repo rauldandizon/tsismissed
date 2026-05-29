@@ -48,24 +48,24 @@ export function MessageList({
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center">
-        <Loader2 size={24} className="text-gray-300 animate-spin" />
+      <div className="flex-1 flex items-center justify-center bg-tsismis-bg">
+        <Loader2 size={24} className="text-tsismis-pink animate-spin" />
       </div>
     );
   }
 
   if (messages.length === 0) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center text-center px-8">
-        <MessageSquare size={40} className="text-gray-200 mb-3" />
-        <p className="text-sm font-medium text-gray-500">No messages yet</p>
-        <p className="text-xs text-gray-400 mt-1">Say hi! Send the first message.</p>
+      <div className="flex-1 flex flex-col items-center justify-center text-center px-8 bg-tsismis-bg select-none animate-in fade-in duration-300">
+        <MessageSquare size={40} className="text-tsismis-hint mb-3" />
+        <p className="text-sm font-semibold text-tsismis-muted">Start the tsismis!</p>
+        <p className="text-xs text-tsismis-hint mt-1">Say hi and get the chika going.</p>
       </div>
     );
   }
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-0.5">
+    <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 bg-tsismis-bg">
       {messages.map((msg) => (
         <MessageBubble
           key={msg.id}

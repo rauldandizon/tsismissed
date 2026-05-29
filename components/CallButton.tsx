@@ -15,7 +15,7 @@ export function CallButton({ callType, onClick, disabled }: CallButtonProps) {
       onClick={() => onClick(callType)}
       disabled={disabled}
       title={callType === "audio" ? "Start audio call" : "Start video call"}
-      className="p-1.5 rounded text-gray-500 hover:text-gray-800 hover:bg-gray-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      className="h-8 w-8 flex items-center justify-center rounded-full bg-transparent text-tsismis-muted hover:text-tsismis-text hover:bg-white/5 transition-all active:scale-[0.95] disabled:opacity-40 disabled:cursor-not-allowed shrink-0 cursor-pointer"
     >
       {callType === "audio" ? <Phone size={18} /> : <Video size={18} />}
     </button>

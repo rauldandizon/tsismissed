@@ -7,6 +7,7 @@ import { useAuth } from "@/components/AuthProvider";
 import { getUserDoc, updateUserProfile } from "@/lib/firestore";
 import { ProfileForm } from "@/components/ProfileForm";
 import { AvatarUploader } from "@/components/AvatarUploader";
+import { ThemeLogo } from "@/components/ThemeLogo";
 import type { UserProfile } from "@/types/user";
 
 export default function ProfilePage() {
@@ -49,16 +50,19 @@ export default function ProfilePage() {
 
   if (authLoading || profileLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 size={32} className="animate-spin text-blue-600" />
+      <div className="min-h-screen flex items-center justify-center bg-tsismis-bg">
+        <Loader2 size={32} className="animate-spin text-tsismis-pink" />
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-md p-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">
+    <div className="min-h-screen flex items-center justify-center bg-tsismis-bg px-4 transition-all duration-150">
+      <div className="w-full max-w-md bg-tsismis-surface border border-tsismis-border rounded-2xl shadow-xl p-8">
+        <div className="flex justify-center mb-3">
+          <ThemeLogo variant="icon" height={40} width={40} />
+        </div>
+        <h1 className="text-2xl font-bold text-tsismis-text mb-6 text-center">
           {profile?.displayName ? "Edit Profile" : "Set Up Your Profile"}
         </h1>
         <div className="mb-6">
@@ -79,7 +83,7 @@ export default function ProfilePage() {
           <button
             type="button"
             onClick={() => router.push("/chat")}
-            className="mt-3 w-full text-sm text-gray-500 hover:text-gray-700 text-center"
+            className="mt-4 w-full text-sm text-tsismis-muted hover:text-tsismis-text text-center transition-colors cursor-pointer"
           >
             Skip for now
           </button>

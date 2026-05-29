@@ -1,26 +1,74 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #0D0A1A;
+  --foreground: #F0E6FF;
+
+  /* Dark Theme Palette (Default) */
+  --tsismis-bg: #0D0A1A;
+  --tsismis-sidebar: #120E22;
+  --tsismis-surface: #1A1530;
+  --tsismis-border: #2D2550;
+  --tsismis-pink: #F72585;
+  --tsismis-purple: #7209B7;
+  --tsismis-cyan: #4CC9F0;
+  --tsismis-mango: #F8961E;
+  --tsismis-text: #F0E6FF;
+  --tsismis-muted: #9D8EC0;
+  --tsismis-hint: #5C5080;
+
+  --tsismis-gradient: linear-gradient(135deg, #7209B7, #F72585);
+  --tsismis-bubble-gradient: linear-gradient(135deg, #7209B7 0%, #F72585 100%);
+  --tsismis-active-item: linear-gradient(90deg, rgba(247,37,133,0.15) 0%, transparent 100%);
 }
 
-@theme inline {
+.light {
+  /* Warm Mango/Cream Veranda Light Palette */
+  --background: #FFF9F2;
+  --foreground: #2C1E11;
+
+  --tsismis-bg: #FFF9F2;
+  --tsismis-sidebar: #FFF3E3;
+  --tsismis-surface: #FFFFFF;
+  --tsismis-border: #EADCC9;
+  --tsismis-pink: #F72585;      /* Brand pink remains vibrant! */
+  --tsismis-purple: #9B5DE5;    /* Contrast purple for light backgrounds */
+  --tsismis-cyan: #00B4D8;      /* Contrast cyan */
+  --tsismis-mango: #F8961E;     /* Playful mango accent */
+  --tsismis-text: #2C1E11;      /* Warm coffee-brown text */
+  --tsismis-muted: #614E3C;     /* Warm chocolate secondary */
+  --tsismis-hint: #8F7D6B;      /* Warm beige-brown hints */
+
+  --tsismis-gradient: linear-gradient(135deg, #9B5DE5, #F72585);
+  --tsismis-bubble-gradient: linear-gradient(135deg, #9B5DE5 0%, #F72585 100%);
+  --tsismis-active-item: linear-gradient(90deg, rgba(247,37,133,0.1) 0%, transparent 100%);
+}
+
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  /* Bind Tailwind color tokens to the dynamic CSS properties */
+  --color-tsismis-bg: var(--tsismis-bg);
+  --color-tsismis-sidebar: var(--tsismis-sidebar);
+  --color-tsismis-surface: var(--tsismis-surface);
+  --color-tsismis-border: var(--tsismis-border);
+  --color-tsismis-pink: var(--tsismis-pink);
+  --color-tsismis-purple: var(--tsismis-purple);
+  --color-tsismis-cyan: var(--tsismis-cyan);
+  --color-tsismis-mango: var(--tsismis-mango);
+  --color-tsismis-text: var(--tsismis-text);
+  --color-tsismis-muted: var(--tsismis-muted);
+  --color-tsismis-hint: var(--tsismis-hint);
+
+  /* Bind Tailwind background images to the dynamic CSS properties */
+  --background-image-tsismis-gradient: var(--tsismis-gradient);
+  --background-image-bubble-gradient: var(--tsismis-bubble-gradient);
+  --background-image-active-item: var(--tsismis-active-item);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
 }

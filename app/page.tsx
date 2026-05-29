@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { useAuth } from "@/components/AuthProvider";
+import { ThemeLogo } from "@/components/ThemeLogo";
 import { getUserDoc } from "@/lib/firestore";
 
 export default function HomePage() {
@@ -26,8 +26,9 @@ export default function HomePage() {
   }, [user, loading, router]);
 
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <Loader2 size={32} className="animate-spin text-blue-600" />
+    <div className="min-h-screen flex flex-col items-center justify-center bg-tsismis-bg">
+      <ThemeLogo variant="icon" height={64} className="animate-pulse" />
+      <p className="text-xs text-tsismis-hint mt-3">Loading...</p>
     </div>
   );
 }

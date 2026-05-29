@@ -41,18 +41,17 @@ export function UserAvatar({ displayName = "", photoURL, size = 40, className = 
         src={photoURL}
         alt={displayName}
         style={style}
-        className={`rounded-full object-cover flex-shrink-0 ${className}`}
+        className={`rounded-full object-cover flex-shrink-0 border-2 border-tsismis-border ${className}`}
       />
     );
   }
 
   const initials = getInitials(displayName) || "?";
-  const colorClass = getColorClass(displayName);
 
   return (
     <div
       style={style}
-      className={`rounded-full flex items-center justify-center text-white font-semibold flex-shrink-0 select-none ${colorClass} ${className}`}
+      className={`rounded-full flex items-center justify-center text-white font-bold flex-shrink-0 select-none bg-tsismis-gradient border-2 border-tsismis-border ${className}`}
     >
       {initials}
     </div>

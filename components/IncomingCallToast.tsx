@@ -90,42 +90,42 @@ export function IncomingCallToast({
             if (!open) dismiss(toast.messageId);
           }}
           duration={15000}
-          className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 flex items-start gap-3 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-80 data-[state=open]:slide-in-from-bottom-full"
+          className="bg-tsismis-surface border border-tsismis-pink/40 rounded-2xl shadow-[0_4px_24px_rgba(247,37,133,0.15)] p-4 flex items-start gap-3 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-80 data-[state=open]:slide-in-from-bottom-full text-tsismis-text transition-all duration-200"
         >
           <div className="flex-shrink-0 mt-0.5">
             {toast.callType === "audio" ? (
-              <Phone size={18} className="text-green-600" />
+              <Phone size={18} className="text-tsismis-pink" />
             ) : (
-              <Video size={18} className="text-blue-600" />
+              <Video size={18} className="text-tsismis-pink" />
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <Toast.Title className="text-sm font-semibold text-gray-900">
-              Incoming {toast.callType === "audio" ? "Audio" : "Video"} Call
+            <Toast.Title className="text-sm font-semibold text-tsismis-text">
+              Incoming {toast.callType === "audio" ? "Voice" : "Video"} Call
             </Toast.Title>
-            <Toast.Description className="text-xs text-gray-500 mt-0.5">
+            <Toast.Description className="text-xs text-tsismis-muted mt-0.5">
               Someone is calling you
             </Toast.Description>
-            <div className="flex gap-2 mt-2">
+            <div className="flex gap-2 mt-3">
               <button
                 onClick={() => {
                   dismiss(toast.messageId);
                   onJoinCall(toast.callUrl, toast.callType);
                 }}
-                className="px-3 py-1 text-xs font-medium bg-green-600 text-white rounded-md hover:bg-green-700 transition-colors"
+                className="px-4 py-1.5 text-xs font-semibold bg-tsismis-gradient text-white rounded-full hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer shadow-md shadow-tsismis-pink/10"
               >
-                Join Call
+                Sumali sa tawag
               </button>
               <button
                 onClick={() => dismiss(toast.messageId)}
-                className="px-3 py-1 text-xs font-medium bg-gray-100 text-gray-600 rounded-md hover:bg-gray-200 transition-colors"
+                className="px-4 py-1.5 text-xs font-semibold bg-transparent border border-tsismis-pink/30 text-tsismis-muted rounded-full hover:bg-white/5 active:scale-[0.97] transition-all cursor-pointer"
               >
                 Dismiss
               </button>
             </div>
           </div>
           <Toast.Close asChild>
-            <button className="flex-shrink-0 text-gray-400 hover:text-gray-600 transition-colors">
+            <button className="flex-shrink-0 text-tsismis-muted hover:text-tsismis-text transition-colors cursor-pointer">
               <X size={14} />
             </button>
           </Toast.Close>

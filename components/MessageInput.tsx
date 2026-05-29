@@ -46,25 +46,25 @@ export function MessageInput({
   }
 
   return (
-    <div className="shrink-0 border-t border-gray-200 bg-white px-4 py-3">
+    <div className="shrink-0 border-t border-tsismis-border bg-tsismis-sidebar p-4 transition-all duration-150">
       {error && (
-        <p className="text-xs text-red-500 mb-2">{error}</p>
+        <p className="text-xs text-red-400 mb-2 font-medium">{error}</p>
       )}
-      <div className="flex items-end gap-2">
+      <div className="flex items-end gap-2.5">
         <textarea
           ref={textareaRef}
           value={text}
           onChange={(e) => setText(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Type a message…"
+          placeholder="Mag-type ng tsismis..."
           rows={1}
-          className="flex-1 resize-none rounded-2xl border border-gray-200 bg-gray-50 px-4 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors max-h-32 overflow-y-auto"
+          className="flex-1 resize-none rounded-xl border border-tsismis-border bg-tsismis-surface px-4 py-2.5 text-sm text-tsismis-text placeholder:text-tsismis-hint outline-none focus:border-tsismis-pink focus:ring-1 focus:ring-tsismis-pink/30 transition-all max-h-32 overflow-y-auto"
           style={{ lineHeight: "1.5" }}
         />
         <button
           onClick={handleSend}
           disabled={!text.trim() || sending}
-          className="p-2.5 rounded-full bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors shrink-0"
+          className="p-2.5 rounded-full bg-tsismis-gradient text-white hover:opacity-90 active:scale-[0.97] transition-all disabled:opacity-40 disabled:cursor-not-allowed shrink-0 flex items-center justify-center cursor-pointer shadow-md shadow-tsismis-pink/10"
           aria-label="Send message"
         >
           <Send size={16} />

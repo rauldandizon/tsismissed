@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { LogOut, MessageSquare, Search, X } from "lucide-react";
+import { LogOut, Search, X } from "lucide-react";
+import { ThemeLogo } from "@/components/ThemeLogo";
 import { useAuth } from "@/components/AuthProvider";
 import { UserAvatar } from "@/components/UserAvatar";
 import { ContactSearch } from "@/components/ContactSearch";
@@ -12,6 +13,7 @@ import { MessageList } from "@/components/MessageList";
 import { MessageInput } from "@/components/MessageInput";
 import { CallDialog } from "@/components/CallDialog";
 import { IncomingCallToast } from "@/components/IncomingCallToast";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import { subscribeContacts } from "@/lib/contacts";
 import {
   getOrCreateConversation,
@@ -151,55 +153,36 @@ export function ChatLayout() {
   const conversationIds = conversations.map((c) => c.id);
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="flex h-screen bg-tsismis-bg text-tsismis-text overflow-hidden transition-all duration-150">
       {/* Left sidebar */}
       <aside
-        className={`flex-col w-full md:w-80 border-r border-gray-200 shrink-0 ${
+        className={`flex-col w-full md:w-[300px] lg:w-[320px] border-r border-tsismis-border shrink-0 bg-tsismis-sidebar ${
           mobileView === "chat" ? "hidden md:flex" : "flex"
         }`}
       >
-        {/* Sidebar header */}
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
-          <div className="flex items-center gap-2">
-            <MessageSquare size={18} className="text-blue-600" />
-            <span className="font-semibold text-gray-900 text-sm">
-              TsisMissed
-            </span>
-          </div>
-          <div className="flex items-center gap-2">
-            <UserAvatar
-              displayName={user.displayName ?? ""}
-              photoURL={user.photoURL ?? ""}
-              size={28}
-            />
-            <button
-              onClick={handleSignOut}
-              title="Sign out"
-              className="p-1 rounded text-gray-400 hover:text-gray-700 hover:bg-gray-100 transition-colors"
-            >
-              <LogOut size={16} />
-            </button>
-          </div>
+        {/* Sidebar header — brand logo only */}
+        <div className="flex items-center px-4 h-16 border-b border-tsismis-border bg-gradient-to-b from-tsismis-surface to-tsismis-sidebar select-none shrink-0">
+          <ThemeLogo variant="full" height={32} width={160} />
         </div>
 
         {/* Search bar */}
-        <div className="px-3 py-2 border-b border-gray-100">
+        <div className="px-4 py-3 border-b border-tsismis-border bg-tsismis-sidebar">
           <div className="relative flex items-center">
             <Search
               size={14}
-              className="absolute left-2.5 text-gray-400 pointer-events-none"
+              className="absolute left-3.5 text-tsismis-hint pointer-events-none"
             />
             <input
               type="text"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search people…"
-              className="w-full pl-8 pr-8 py-1.5 text-sm bg-gray-100 rounded-md outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-colors placeholder:text-gray-400"
+              placeholder="Hanapin ang ka-tsismis mo..."
+              className="w-full pl-10 pr-8 py-2 text-sm bg-tsismis-sidebar border border-tsismis-border rounded-full text-tsismis-text placeholder:text-tsismis-hint outline-none focus:border-tsismis-pink/50 focus:ring-1 focus:ring-tsismis-pink/30 transition-all"
             />
             {isSearching && (
               <button
                 onClick={() => setSearchTerm("")}
-                className="absolute right-2 text-gray-400 hover:text-gray-600"
+                className="absolute right-3.5 text-tsismis-hint hover:text-tsismis-muted transition-colors cursor-pointer"
               >
                 <X size={14} />
               </button>
@@ -208,7 +191,7 @@ export function ChatLayout() {
         </div>
 
         {/* Contact list or search results */}
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1 overflow-y-auto bg-tsismis-sidebar py-2">
           {isSearching ? (
             <ContactSearch
               term={searchTerm}
@@ -225,11 +208,47 @@ export function ChatLayout() {
             />
           )}
         </div>
+
+        {/* Sidebar profile footer */}
+        <div className="flex items-center justify-between px-4 py-3 border-t border-tsismis-border bg-gradient-to-b from-tsismis-sidebar to-tsismis-surface/30 shrink-0">
+          {/* Left — Avatar + Name + Online badge */}
+          <div className="flex items-center gap-2.5 min-w-0">
+            <div className="relative shrink-0">
+              <UserAvatar
+                displayName={user.displayName ?? ""}
+                photoURL={user.photoURL ?? ""}
+                size={36}
+              />
+              {/* Online indicator dot */}
+              <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-tsismis-cyan border-2 border-tsismis-sidebar" />
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-semibold text-tsismis-text truncate leading-tight">
+                {user.displayName ?? "User"}
+              </span>
+              <span className="text-[10px] font-medium text-tsismis-cyan leading-tight tracking-wide">
+                Online
+              </span>
+            </div>
+          </div>
+          {/* Right — Controls */}
+          <div className="flex items-center gap-1 shrink-0">
+            <ThemeToggle />
+            <button
+              onClick={handleSignOut}
+              title="Sign out"
+              aria-label="Sign out"
+              className="h-8 w-8 flex items-center justify-center rounded-full text-tsismis-muted hover:text-[#FF4D6D] hover:bg-[#FF4D6D]/10 transition-all duration-200 active:scale-[0.9] cursor-pointer"
+            >
+              <LogOut size={16} />
+            </button>
+          </div>
+        </div>
       </aside>
 
       {/* Right area — chat panel */}
       <main
-        className={`flex-1 flex-col ${
+        className={`flex-1 flex-col bg-tsismis-bg ${
           mobileView === "list" ? "hidden md:flex" : "flex"
         }`}
       >
@@ -253,10 +272,13 @@ export function ChatLayout() {
             />
           </>
         ) : (
-          <div className="flex flex-col items-center justify-center h-full bg-gray-50">
-            <MessageSquare size={48} className="text-gray-200 mb-3" />
-            <p className="text-sm text-gray-400">
-              Select a contact to start chatting.
+          <div className="flex flex-col items-center justify-center h-full bg-tsismis-bg text-center px-8">
+            <div className="mb-4 opacity-80">
+              <ThemeLogo variant="full" height={64} />
+            </div>
+            <h3 className="text-sm font-semibold text-tsismis-muted uppercase tracking-wider">Start the tsismis!</h3>
+            <p className="text-xs text-tsismis-hint mt-1.5 max-w-xs leading-relaxed">
+              Pumili ng ka-tsismis sa kaliwa para magsimula ng chika at tsismisan.
             </p>
           </div>
         )}

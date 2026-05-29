@@ -1,6 +1,6 @@
 "use client";
 
-import { Users } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { UserAvatar } from "@/components/UserAvatar";
 import { getConversationId } from "@/lib/conversations";
 import type { Contact } from "@/types/contact";
@@ -44,11 +44,11 @@ export function ConversationList({
 }: ConversationListProps) {
   if (contacts.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
-        <Users size={40} className="text-gray-300 mb-3" />
-        <p className="text-sm font-medium text-gray-500">No contacts yet</p>
-        <p className="text-xs text-gray-400 mt-1">
-          Search for people above to add them.
+      <div className="flex flex-col items-center justify-center px-6 py-12 text-center select-none">
+        <Sparkles size={40} className="text-tsismis-hint mb-3 animate-pulse duration-1000" />
+        <p className="text-sm font-semibold text-tsismis-muted">No tsismis yet!</p>
+        <p className="text-xs text-tsismis-hint mt-1 max-w-[200px]">
+          Search for friends above to start the chika.
         </p>
       </div>
     );
@@ -71,7 +71,7 @@ export function ConversationList({
   });
 
   return (
-    <ul>
+    <ul className="space-y-0.5">
       {sorted.map((contact) => {
         const conversationId = getConversationId(currentUid, contact.uid);
         const conversation = conversationMap.get(conversationId);
@@ -88,10 +88,10 @@ export function ConversationList({
           <li
             key={contact.uid}
             onClick={() => onSelect(contact)}
-            className={`flex items-center gap-3 px-4 py-3 cursor-pointer transition-colors ${
+            className={`flex items-center gap-3 p-3 cursor-pointer transition-all duration-150 rounded-xl mx-2 my-0.5 border ${
               isSelected
-                ? "bg-blue-50 border-r-2 border-blue-600"
-                : "hover:bg-gray-50"
+                ? "bg-active-item border-l-[3px] border-l-tsismis-pink border-y-transparent border-r-transparent"
+                : "hover:bg-white/5 border-transparent hover:border-tsismis-border"
             }`}
           >
             <UserAvatar
@@ -101,16 +101,16 @@ export function ConversationList({
             />
             <div className="flex-1 min-w-0">
               <div className="flex items-baseline justify-between gap-1">
-                <p className="text-sm font-medium text-gray-900 truncate">
+                <p className="text-sm font-semibold text-tsismis-text truncate">
                   {contact.displayName}
                 </p>
                 {previewTime && (
-                  <span className="text-[10px] text-gray-400 shrink-0">
+                  <span className="text-[10px] text-tsismis-hint shrink-0 font-medium">
                     {previewTime}
                   </span>
                 )}
               </div>
-              <p className="text-xs text-gray-500 truncate">{subtitle}</p>
+              <p className="text-xs text-tsismis-muted truncate mt-0.5">{subtitle}</p>
             </div>
           </li>
         );

@@ -37,38 +37,38 @@ export function MessageBubble({ message, isOwn, otherUid, onJoinCall }: MessageB
 
   if (message.type === "call") {
     const callType = message.callType ?? "audio";
-    const label = callType === "audio" ? "Audio call" : "Video call";
+    const label = callType === "audio" ? "Voice Call" : "Video Call";
 
     if (isOwn) {
       return (
-        <div className="flex flex-col items-end mb-1">
-          <div className="flex items-center gap-2 px-3 py-2 rounded-2xl rounded-br-sm bg-blue-600 text-white text-sm">
+        <div className="flex flex-col items-end mb-1 animate-in fade-in slide-in-from-bottom-1 duration-200">
+          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl rounded-br-sm bg-tsismis-surface border border-tsismis-purple/50 text-tsismis-text text-sm">
             <CallIcon callType={callType} />
-            <span>{label}</span>
+            <span className="font-semibold text-tsismis-pink">{label}</span>
           </div>
           {time && (
-            <span className="text-[10px] text-gray-400 mt-0.5 px-1">{time}</span>
+            <span className="text-[10px] text-tsismis-hint mt-1 px-1 font-medium">{time}</span>
           )}
         </div>
       );
     }
 
     return (
-      <div className="flex flex-col items-start mb-1">
-        <div className="flex items-center gap-2 px-3 py-2 rounded-2xl rounded-bl-sm bg-gray-100 text-gray-900 text-sm">
+      <div className="flex flex-col items-start mb-1 animate-in fade-in slide-in-from-bottom-1 duration-200">
+        <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl rounded-bl-sm bg-tsismis-surface border border-tsismis-purple/50 text-tsismis-text text-sm">
           <CallIcon callType={callType} />
-          <span>{label}</span>
+          <span className="font-semibold text-tsismis-muted">{label}</span>
           {message.callUrl && onJoinCall && (
             <button
               onClick={() => onJoinCall(message.callUrl!, callType)}
-              className="ml-1 px-2.5 py-0.5 text-xs font-medium bg-green-600 text-white rounded-full hover:bg-green-700 transition-colors"
+              className="ml-2.5 px-4 py-1 text-xs font-semibold bg-transparent border border-tsismis-pink text-tsismis-pink rounded-full hover:bg-tsismis-pink/10 transition-all active:scale-[0.97] cursor-pointer"
             >
-              Join
+              Sumali sa tawag
             </button>
           )}
         </div>
         {time && (
-          <span className="text-[10px] text-gray-400 mt-0.5 px-1">{time}</span>
+          <span className="text-[10px] text-tsismis-hint mt-1 px-1 font-medium">{time}</span>
         )}
       </div>
     );
@@ -76,31 +76,31 @@ export function MessageBubble({ message, isOwn, otherUid, onJoinCall }: MessageB
 
   // Text message
   const isSeen = message.readBy?.includes(otherUid) ?? false;
-  const receipt = isSeen ? "Seen" : "Sent";
+  const receipt = isSeen ? "Seen ✓" : "Sent";
 
   if (isOwn) {
     return (
-      <div className="flex flex-col items-end mb-1">
-        <div className="max-w-[70%] px-3 py-2 rounded-2xl rounded-br-sm bg-blue-600 text-white text-sm leading-relaxed">
+      <div className="flex flex-col items-end mb-1 animate-in fade-in slide-in-from-bottom-1 duration-200">
+        <div className="max-w-[70%] px-4 py-2.5 rounded-2xl rounded-br-sm bg-bubble-gradient text-white text-sm leading-relaxed shadow-md shadow-tsismis-pink/5">
           {message.text}
         </div>
-        <div className="flex items-center gap-1 mt-0.5 px-1">
+        <div className="flex items-center gap-1.5 mt-1 px-1 font-medium">
           {time && (
-            <span className="text-[10px] text-gray-400">{time}</span>
+            <span className="text-[10px] text-tsismis-hint">{time}</span>
           )}
-          <span className="text-[10px] text-gray-400">{receipt}</span>
+          <span className={`text-[10px] ${isSeen ? "text-tsismis-cyan" : "text-tsismis-hint"}`}>{receipt}</span>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col items-start mb-1">
-      <div className="max-w-[70%] px-3 py-2 rounded-2xl rounded-bl-sm bg-gray-100 text-gray-900 text-sm leading-relaxed">
+    <div className="flex flex-col items-start mb-1 animate-in fade-in slide-in-from-bottom-1 duration-200">
+      <div className="max-w-[70%] px-4 py-2.5 rounded-2xl rounded-bl-sm bg-tsismis-surface border border-tsismis-border text-tsismis-text text-sm leading-relaxed shadow-sm">
         {message.text}
       </div>
       {time && (
-        <span className="text-[10px] text-gray-400 mt-0.5 px-1">{time}</span>
+        <span className="text-[10px] text-tsismis-hint mt-1 px-1 font-medium">{time}</span>
       )}
     </div>
   );

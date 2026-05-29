@@ -39,20 +39,23 @@ export function ContactSearch({ term, currentUid, contactUids }: ContactSearchPr
 
   if (searching) {
     return (
-      <div className="flex justify-center py-8">
-        <Loader2 size={20} className="animate-spin text-gray-400" />
+      <div className="flex justify-center py-12">
+        <Loader2 size={20} className="animate-spin text-tsismis-pink" />
       </div>
     );
   }
 
   if (results.length === 0) {
     return (
-      <p className="px-4 py-8 text-center text-sm text-gray-400">No users found.</p>
+      <div className="px-4 py-12 text-center select-none">
+        <p className="text-sm font-semibold text-tsismis-muted">Wala kaming nahanap.</p>
+        <p className="text-xs text-tsismis-hint mt-1">Subukan mong mag-search ng ibang pangalan.</p>
+      </div>
     );
   }
 
   return (
-    <ul>
+    <ul className="space-y-0.5">
       {results.map((user) => (
         <li key={user.uid}>
           <SearchResultItem

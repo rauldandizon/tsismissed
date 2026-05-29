@@ -9,9 +9,9 @@ Read this file before starting any session. Update this file after completing an
 ## Project Status Summary
 
 ```
-Current Session   : Session 5 — Calling Feature
+Current Session   : Session 6 — Polish, Rules, and Deployment
 Overall Status    : In Progress
-Last Updated      : 2026-05-29
+Last Updated      : 2026-05-30
 Build Status      : Passed (Next.js 16.2.6, Turbopack)
 Deployment Status : Not Deployed
 ```
@@ -25,7 +25,7 @@ Deployment Status : Not Deployed
 [x] Session 2 — Authentication and User Profile
 [x] Session 3 — Contacts and Search
 [x] Session 4 — One-on-One Chat
-[ ] Session 5 — Calling Feature
+[x] Session 5 — Calling Feature
 [ ] Session 6 — Polish, Rules, and Deployment
 ```
 
@@ -319,9 +319,10 @@ export function createRoomName(
   conversationId: string,
   callType: CallType
 ): string {
-  const shortId = conversationId.replace("_", "").slice(0, 12);
+  // VDO.Ninja: alphanumeric only, max 30 chars
+  const shortId = conversationId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12);
   const timestamp = Date.now().toString(36);
-  return `tm-${shortId}-${callType === "audio" ? "a" : "v"}-${timestamp}`;
+  return `tm${shortId}${callType === "audio" ? "a" : "v"}${timestamp}`;
 }
 
 export function buildCallUrl(
@@ -331,25 +332,33 @@ export function buildCallUrl(
   const base = `https://vdo.ninja/?room=${encodeURIComponent(roomName)}`;
 
   if (callType === "audio") {
-    return `${base}&videodevice=0&novideo`;
+    return `${base}&miconly&autostart&videodevice=0&novideo`;
   }
 
-  return base;
+  return `${base}&webcam&autostart`;
 }
 
 export function getIframeAllowAttribute(): string {
-  return "camera; microphone; autoplay; display-capture";
+  return "camera; microphone; autoplay; display-capture; fullscreen";
 }
 ```
 
 **Notes:**
 
 ```
-- callProvider.ts matches the verified spec in AGENTS.md exactly — do not modify URL logic.
-- Audio call URL: ?room=X&videodevice=0&novideo (both params required — novideo alone is insufficient).
-- Video call URL: ?room=X only.
+- Audio call URL: ?room=X&miconly&autostart&videodevice=0&novideo
+    - &miconly prevents video publishing
+    - &autostart skips VDO.Ninja's device/option selection lobby screen
+    - &videodevice=0 prevents camera activation (sender-side)
+    - &novideo suppresses video rendering (viewer-side)
+- Video call URL: ?room=X&webcam&autostart
+    - &webcam auto-selects camera and hides screenshare option
+    - &autostart skips VDO.Ninja's device/option selection lobby screen
+- createRoomName strips all non-alphanumeric chars and limits to 30 chars total.
+  VDO.Ninja enforces a max room name length of 30 alphanumeric characters.
 - Caller: iframe loads immediately via useEffect when open=true and mode="caller".
 - Receiver: joined state starts false; iframe only renders after receiver clicks Join Call.
+- Receiver always uses the stored callUrl from Firestore — never generates a new room.
 - CallDialog cleanup: iframeRef.current.src set to "" directly before onClose() to stop streams.
 - Toast deduplication: shownToastIds useRef<Set<string>> — never show the same message ID twice.
 - Toast 30-second window checked against msg.createdAt.toDate().getTime().
@@ -370,12 +379,17 @@ export function getIframeAllowAttribute(): string {
 
 **Scope:** Finish UI polish, remove non-functional controls, finalize Firestore security rules, update README, test Vercel deployment readiness, and document known limitations.
 
-**Status:** `Not Started`
+**Status:** `In Progress`
 
 **Files Created or Modified:**
 
 ```
--
+components/ChatLayout.tsx           modified (×3 — theme header fix, empty state logo, sidebar profile footer)
+components/ThemeToggle.tsx          modified
+components/AuthForm.tsx             modified (two-column layout + contextual chat previews + 30% logo)
+app/login/page.tsx                  modified
+app/register/page.tsx               modified
+app/forgot-password/page.tsx        modified
 ```
 
 **Acceptance Criteria:**
@@ -514,5 +528,10 @@ Notes       :
 ## Next Steps
 
 ```
-- Implement Session 5: Calling Feature
+- Continue Session 6: Polish, Rules, and Deployment
+  - Remove or hide any non-functional UI controls
+  - Finalize Firestore security rules
+  - Update README with Firebase, Cloudinary, and calling setup
+  - Test Vercel deployment readiness
+  - Run full two-user test log
 ```
