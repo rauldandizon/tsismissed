@@ -9,7 +9,7 @@ Read this file before starting any session. Update this file after completing an
 ## Project Status Summary
 
 ```
-Current Session   : Session 9 — Call Status Flow (Missed / Answered / Duration)
+Current Session   : Session 10 — Polish, Rules, and Deployment
 Overall Status    : In Progress
 Last Updated      : 2026-05-30
 Build Status      : Passed (Next.js 16.2.6, Turbopack)
@@ -29,7 +29,7 @@ Deployment Status : Not Deployed
 [x] Session 6  — Unread Counter + Typing Indicator + Emoji
 [x] Session 7  — Contact Requests + Block User
 [x] Session 8  — Media Messages (Images + Audio)
-[ ] Session 9  — Call Status Flow (Missed / Answered / Duration)
+[x] Session 9  — Call Status Flow (Missed / Answered / Duration)
 [ ] Session 10 — Polish, Rules, and Deployment
 ```
 
@@ -569,38 +569,54 @@ components/ImageViewer.tsx          created (full-screen image viewer with downl
 
 **Scope:** Add call status to call messages: pending → answered/missed/ended. Show duration and missed state in the chat bubble.
 
-**Status:** `Not Started`
+**Status:** `Done`
 
 **Files Created or Modified:**
 
 ```
-(pending)
+types/message.ts                    modified (added callStatus, callDuration fields)
+types/call.ts                       modified (added messageId to CallState)
+lib/calls.ts                        modified (sendCallMessage returns messageId; added updateCallMessage)
+components/CallDialog.tsx           modified (60s missed timer, answered on join, ended+duration on close)
+components/MessageBubble.tsx        modified (status-aware call bubble: missed/ended/pending labels + duration)
+components/MessageList.tsx          modified (onJoinCall signature includes messageId)
+components/ChatLayout.tsx           modified (threads messageId through call state and handleJoinCall)
+components/IncomingCallToast.tsx    modified (onJoinCall signature and call site include messageId)
+firestore.rules                     modified (allow callStatus and callDuration updates on messages)
 ```
 
 **Acceptance Criteria:**
 
 ```
-[ ] Call messages created with callStatus: "pending"
-[ ] Receiver clicking Join marks call as "answered"
-[ ] 60s timeout marks unanswered call as "missed"
-[ ] Closing CallDialog records duration and marks call as "ended"
-[ ] Chat bubble shows "Missed audio/video call" for missed calls
-[ ] Chat bubble shows "Audio/video call ended · Xm Xs" for ended calls
-[ ] Duration is approximate (CallDialog join-to-close, client-side)
-[ ] npm run build passes
+[x] Call messages created with callStatus: "pending"
+[x] Receiver clicking Join marks call as "answered"
+[x] 60s timeout marks unanswered call as "missed"
+[x] Closing CallDialog records duration and marks call as "ended"
+[x] Chat bubble shows "Missed audio/video call" for missed calls
+[x] Chat bubble shows "Audio/video call ended · Xm Xs" for ended calls
+[x] Duration is approximate (CallDialog join-to-close, client-side)
+[x] npm run build passes
 ```
 
 **Notes:**
 
 ```
-- Duration measured from iframe load to dialog close. Approximate only.
-- Missed-call timeout is client-side. Known limitation: if caller closes browser, timeout is lost.
+- callStatus absent on old messages is treated as "pending" — shows generic "Voice Call"/"Video Call" label.
+- Caller auto-joins iframe → joinedAt set immediately. 60s timer marks "missed" in Firestore.
+  If caller closes before 60s fires, timer is cancelled and call is marked "ended" with duration.
+  If 60s fires first, closing the dialog does NOT overwrite "missed" (callWasMissedRef guard).
+- Receiver: joinedAt set on Join click → "answered" written. Close → "ended" with duration.
+  Receiver closing without joining → "missed".
+- Duration is measured from iframe load (caller: dialog open; receiver: Join click) to dialog close.
+- IncomingCallToast also updated to pass messageId through onJoinCall for correct receiver flow.
+- firebase deploy --only firestore:rules must be run after this session.
+- npm run build passed (Next.js 16.2.6, Turbopack).
 ```
 
 **Issues / Blockers:**
 
 ```
--
+- None
 ```
 
 ---

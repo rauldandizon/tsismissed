@@ -16,7 +16,7 @@ interface ToastItem {
 interface IncomingCallToastProps {
   conversationIds: string[];
   currentUid: string;
-  onJoinCall: (callUrl: string, callType: CallType) => void;
+  onJoinCall: (callUrl: string, callType: CallType, messageId: string) => void;
 }
 
 export function IncomingCallToast({
@@ -110,7 +110,7 @@ export function IncomingCallToast({
               <button
                 onClick={() => {
                   dismiss(toast.messageId);
-                  onJoinCall(toast.callUrl, toast.callType);
+                  onJoinCall(toast.callUrl, toast.callType, toast.messageId);
                 }}
                 className="px-4 py-1.5 text-xs font-semibold bg-tsismis-gradient text-white rounded-full hover:opacity-90 active:scale-[0.97] transition-all cursor-pointer shadow-md shadow-tsismis-pink/10"
               >

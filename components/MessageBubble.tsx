@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Phone, Video } from "lucide-react";
+import { Phone, Video, PhoneMissed } from "lucide-react";
 import type { Timestamp } from "firebase/firestore";
 import type { Message } from "@/types/message";
 import type { CallType } from "@/lib/callProvider";
@@ -11,7 +11,7 @@ interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
   otherUid: string;
-  onJoinCall?: (callUrl: string, callType: CallType) => void;
+  onJoinCall?: (callUrl: string, callType: CallType, messageId: string) => void;
 }
 
 function formatTime(timestamp: Timestamp | null | undefined): string {
@@ -26,7 +26,14 @@ function formatTime(timestamp: Timestamp | null | undefined): string {
   }
 }
 
-function CallIcon({ callType }: { callType: CallType }) {
+function formatDuration(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m > 0 ? `${m}m ${s}s` : `${s}s`;
+}
+
+function CallIcon({ callType, missed }: { callType: CallType; missed?: boolean }) {
+  if (missed) return <PhoneMissed size={14} className="shrink-0" />;
   return callType === "audio" ? (
     <Phone size={14} className="shrink-0" />
   ) : (
@@ -40,14 +47,35 @@ export function MessageBubble({ message, isOwn, otherUid, onJoinCall }: MessageB
 
   if (message.type === "call") {
     const callType = message.callType ?? "audio";
-    const label = callType === "audio" ? "Voice Call" : "Video Call";
+    const status = message.callStatus;
+
+    const isMissed = status === "missed";
+    const isEnded = status === "ended";
+    const isJoinable = !status || status === "pending" || status === "answered";
+
+    const typeLabel = callType === "audio" ? "audio" : "video";
+
+    let label: string;
+    let labelClass: string;
+
+    if (isMissed) {
+      label = `Missed ${typeLabel} call`;
+      labelClass = "text-[#FF4D6D]";
+    } else if (isEnded) {
+      const dur = formatDuration(message.callDuration ?? 0);
+      label = `${callType === "audio" ? "Audio" : "Video"} call ended · ${dur}`;
+      labelClass = "text-tsismis-muted";
+    } else {
+      label = callType === "audio" ? "Voice Call" : "Video Call";
+      labelClass = isOwn ? "text-tsismis-pink" : "text-tsismis-muted";
+    }
 
     if (isOwn) {
       return (
         <div className="flex flex-col items-end mb-1 animate-in fade-in slide-in-from-bottom-1 duration-200">
           <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl rounded-br-sm bg-tsismis-surface border border-tsismis-purple/50 text-tsismis-text text-sm">
-            <CallIcon callType={callType} />
-            <span className="font-semibold text-tsismis-pink">{label}</span>
+            <CallIcon callType={callType} missed={isMissed} />
+            <span className={`font-semibold ${labelClass}`}>{label}</span>
           </div>
           {time && (
             <span className="text-[10px] text-tsismis-hint mt-1 px-1 font-medium">{time}</span>
@@ -59,11 +87,11 @@ export function MessageBubble({ message, isOwn, otherUid, onJoinCall }: MessageB
     return (
       <div className="flex flex-col items-start mb-1 animate-in fade-in slide-in-from-bottom-1 duration-200">
         <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl rounded-bl-sm bg-tsismis-surface border border-tsismis-purple/50 text-tsismis-text text-sm">
-          <CallIcon callType={callType} />
-          <span className="font-semibold text-tsismis-muted">{label}</span>
-          {message.callUrl && onJoinCall && (
+          <CallIcon callType={callType} missed={isMissed} />
+          <span className={`font-semibold ${labelClass}`}>{label}</span>
+          {isJoinable && message.callUrl && onJoinCall && (
             <button
-              onClick={() => onJoinCall(message.callUrl!, callType)}
+              onClick={() => onJoinCall(message.callUrl!, callType, message.id)}
               className="ml-2.5 px-4 py-1 text-xs font-semibold bg-transparent border border-tsismis-pink text-tsismis-pink rounded-full hover:bg-tsismis-pink/10 transition-all active:scale-[0.97] cursor-pointer"
             >
               Sumali sa tawag

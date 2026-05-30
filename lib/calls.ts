@@ -15,8 +15,8 @@ export async function sendCallMessage(
   callType: CallType,
   callUrl: string,
   roomName: string
-): Promise<void> {
-  await addDoc(
+): Promise<string> {
+  const ref = await addDoc(
     collection(db, "conversations", conversationId, "messages"),
     {
       senderId,
@@ -25,6 +25,7 @@ export async function sendCallMessage(
       callType,
       callUrl,
       roomName,
+      callStatus: "pending",
       createdAt: serverTimestamp(),
       readBy: [senderId],
     }
@@ -36,4 +37,17 @@ export async function sendCallMessage(
     lastMessageAt: serverTimestamp(),
     updatedAt: serverTimestamp(),
   });
+
+  return ref.id;
+}
+
+export async function updateCallMessage(
+  conversationId: string,
+  messageId: string,
+  updates: { callStatus?: string; callDuration?: number }
+): Promise<void> {
+  await updateDoc(
+    doc(db, "conversations", conversationId, "messages", messageId),
+    updates
+  );
 }

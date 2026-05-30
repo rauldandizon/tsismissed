@@ -7,4 +7,5 @@ export interface CallState {
   callUrl: string;
   roomName: string;
   conversationId: string;
+  messageId: string;
 }

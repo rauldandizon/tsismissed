@@ -2,8 +2,13 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X, ExternalLink, Phone, Video } from "lucide-react";
+import { onSnapshot, doc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { getIframeAllowAttribute } from "@/lib/callProvider";
+import { updateCallMessage } from "@/lib/calls";
 import type { CallType } from "@/lib/callProvider";
+
+const MISSED_CALL_TIMEOUT_MS = 60_000;
 
 interface CallDialogProps {
   open: boolean;
@@ -11,6 +16,8 @@ interface CallDialogProps {
   mode: "caller" | "receiver";
   callType: CallType;
   callUrl: string;
+  conversationId: string;
+  messageId: string;
 }
 
 export function CallDialog({
@@ -19,36 +26,137 @@ export function CallDialog({
   mode,
   callType,
   callUrl,
+  conversationId,
+  messageId,
 }: CallDialogProps) {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [iframeSrc, setIframeSrc] = useState("");
   const [joined, setJoined] = useState(false);
 
-  // Caller auto-loads iframe; reset state when dialog closes
+  // Tracks when this side's call actually started (receiver answered / receiver joined)
+  // For caller: set when subscription detects "answered"
+  // For receiver: set when they click Join
+  const joinedAtRef = useRef<number | null>(null);
+  const missedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Always reflects the latest Firestore callStatus for this message
+  const liveStatusRef = useRef<string | undefined>(undefined);
+
+  // Subscribe to live call status so the caller knows when receiver answers
+  useEffect(() => {
+    if (!open || !conversationId || !messageId) return;
+
+    const unsub = onSnapshot(
+      doc(db, "conversations", conversationId, "messages", messageId),
+      (snap) => {
+        const status = snap.data()?.callStatus as string | undefined;
+        liveStatusRef.current = status;
+
+        if (mode === "caller" && status === "answered") {
+          // Receiver joined — cancel the missed timer and start duration tracking
+          if (missedTimerRef.current) {
+            clearTimeout(missedTimerRef.current);
+            missedTimerRef.current = null;
+          }
+          if (joinedAtRef.current === null) {
+            joinedAtRef.current = Date.now();
+          }
+        }
+      }
+    );
+
+    return unsub;
+  }, [open, conversationId, messageId, mode]);
+
+  // Caller: auto-load iframe and start 60s missed-call timer
   useEffect(() => {
     if (open && mode === "caller") {
       setIframeSrc(callUrl);
       setJoined(true);
+      // joinedAtRef is NOT set here — only set when subscription sees "answered"
+
+      missedTimerRef.current = setTimeout(() => {
+        // Only write "missed" if receiver still hasn't answered
+        if (!liveStatusRef.current || liveStatusRef.current === "pending") {
+          updateCallMessage(conversationId, messageId, {
+            callStatus: "missed",
+          }).catch(() => {});
+        }
+      }, MISSED_CALL_TIMEOUT_MS);
     }
-    if (!open) {
-      setIframeSrc("");
-      setJoined(false);
+
+    // Cleanup ensures the timer is cancelled on unmount and on React's
+    // dev-mode double-invoke (StrictMode), preventing orphaned timers that
+    // would fire at 60s and write "missed" over an already-ended call.
+    return () => {
+      if (missedTimerRef.current) {
+        clearTimeout(missedTimerRef.current);
+        missedTimerRef.current = null;
+      }
+    };
+  }, [open, mode, callUrl, conversationId, messageId]);
+
+  // Auto-close when VDO.Ninja fires a disconnect postMessage
+  useEffect(() => {
+    if (!joined) return;
+
+    function handleVdoMessage(e: MessageEvent) {
+      if (!iframeRef.current || e.source !== iframeRef.current.contentWindow) return;
+      const { action, value } = (e.data ?? {}) as { action?: string; value?: unknown };
+      if (
+        (action === "push-connection" || action === "view-connection") &&
+        value === false
+      ) {
+        handleClose(); // eslint-disable-line react-hooks/exhaustive-deps
+      }
     }
-  }, [open, mode, callUrl]);
+
+    window.addEventListener("message", handleVdoMessage);
+    return () => window.removeEventListener("message", handleVdoMessage);
+  }, [joined]); // eslint-disable-line react-hooks/exhaustive-deps
 
   function handleClose() {
-    // Stop camera/mic streams before unmounting
     if (iframeRef.current) {
       iframeRef.current.src = "";
     }
+
+    if (missedTimerRef.current) {
+      clearTimeout(missedTimerRef.current);
+      missedTimerRef.current = null;
+    }
+
+    const status = liveStatusRef.current;
+
+    // Skip update if Firestore already has a terminal status
+    if (status !== "ended" && status !== "missed") {
+      if (joinedAtRef.current !== null) {
+        // Call was answered — record duration
+        const duration = Math.round((Date.now() - joinedAtRef.current) / 1000);
+        updateCallMessage(conversationId, messageId, {
+          callStatus: "ended",
+          callDuration: duration,
+        }).catch(() => {});
+      } else {
+        // Caller closing before receiver answered, or receiver closing without joining
+        updateCallMessage(conversationId, messageId, {
+          callStatus: "missed",
+        }).catch(() => {});
+      }
+    }
+
     setIframeSrc("");
     setJoined(false);
+    joinedAtRef.current = null;
+    liveStatusRef.current = undefined;
     onClose();
   }
 
   function handleJoin() {
     setIframeSrc(callUrl);
     setJoined(true);
+    joinedAtRef.current = Date.now();
+    updateCallMessage(conversationId, messageId, {
+      callStatus: "answered",
+    }).catch(() => {});
   }
 
   if (!open) return null;

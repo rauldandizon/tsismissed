@@ -13,7 +13,7 @@ interface MessageListProps {
   otherUid: string;
   contactName?: string;
   isTyping?: boolean;
-  onJoinCall?: (callUrl: string, callType: CallType) => void;
+  onJoinCall?: (callUrl: string, callType: CallType, messageId: string) => void;
 }
 
 export function MessageList({

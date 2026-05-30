@@ -137,7 +137,7 @@ export function ChatLayout() {
     if (!user || !selectedConversationId || !selectedContact) return;
     const roomName = createRoomName(selectedConversationId, callType);
     const callUrl = buildCallUrl(roomName, callType);
-    await sendCallMessage(
+    const messageId = await sendCallMessage(
       selectedConversationId,
       user.uid,
       selectedContact.uid,
@@ -152,10 +152,11 @@ export function ChatLayout() {
       callUrl,
       roomName,
       conversationId: selectedConversationId,
+      messageId,
     });
   }
 
-  function handleJoinCall(callUrl: string, callType: CallType) {
+  function handleJoinCall(callUrl: string, callType: CallType, messageId: string) {
     setCallState({
       open: true,
       mode: "receiver",
@@ -163,6 +164,7 @@ export function ChatLayout() {
       callUrl,
       roomName: "",
       conversationId: selectedConversationId ?? "",
+      messageId,
     });
   }
 
@@ -401,6 +403,8 @@ export function ChatLayout() {
           mode={callState.mode}
           callType={callState.callType}
           callUrl={callState.callUrl}
+          conversationId={callState.conversationId}
+          messageId={callState.messageId}
         />
       )}
 

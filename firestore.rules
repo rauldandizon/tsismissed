@@ -102,7 +102,7 @@ service cloud.firestore {
           && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds;
         allow update: if isSignedIn()
           && request.auth.uid in get(/databases/$(database)/documents/conversations/$(conversationId)).data.participantIds
-          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy']);
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['readBy', 'callStatus', 'callDuration']);
       }
     }
   }

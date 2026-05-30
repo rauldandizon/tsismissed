@@ -12,6 +12,8 @@ export interface Message {
   mediaUrl?: string;
   mediaPublicId?: string;
   mediaMimeType?: string;
+  callStatus?: "pending" | "answered" | "missed" | "ended";
+  callDuration?: number;
   createdAt: Timestamp;
   readBy?: string[];
 }
