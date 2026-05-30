@@ -5,6 +5,7 @@ import {
   GoogleAuthProvider,
   signOut as firebaseSignOut,
   sendPasswordResetEmail as firebaseSendPasswordResetEmail,
+  sendEmailVerification,
 } from "firebase/auth";
 import { auth } from "./firebase";
 
@@ -15,7 +16,13 @@ export async function signInWithEmail(email: string, password: string) {
 }
 
 export async function signUpWithEmail(email: string, password: string) {
-  return createUserWithEmailAndPassword(auth, email, password);
+  const credential = await createUserWithEmailAndPassword(auth, email, password);
+  try {
+    await sendEmailVerification(credential.user);
+  } catch (err) {
+    console.error("[sendEmailVerification error]", err);
+  }
+  return credential;
 }
 
 export async function signInWithGoogle() {

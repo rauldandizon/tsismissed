@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { Loader2, MessageSquare } from "lucide-react";
+import { MessageSquare } from "lucide-react";
 import { MessageBubble } from "@/components/MessageBubble";
 import { subscribeMessages, markMessagesAsRead } from "@/lib/messages";
 import type { Message } from "@/types/message";
@@ -40,9 +40,13 @@ export function MessageList({
     return unsub;
   }, [conversationId]);
 
+  function scrollToBottom() {
+    bottomRef.current?.scrollIntoView({ behavior: "instant" });
+  }
+
   useEffect(() => {
     if (messages.length === 0) return;
-    bottomRef.current?.scrollIntoView();
+    scrollToBottom();
   }, [messages]);
 
   useEffect(() => {
@@ -52,8 +56,20 @@ export function MessageList({
 
   if (loading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-tsismis-bg">
-        <Loader2 size={24} className="text-tsismis-pink animate-spin" />
+      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-2 bg-tsismis-bg">
+        {[
+          { side: "right", width: "60%" },
+          { side: "left",  width: "45%" },
+          { side: "right", width: "70%" },
+          { side: "left",  width: "35%" },
+        ].map((s, i) => (
+          <div key={i} className={`flex ${s.side === "right" ? "justify-end" : "justify-start"}`}>
+            <div
+              className={`h-10 rounded-2xl animate-pulse bg-tsismis-border/40 ${s.side === "right" ? "rounded-br-sm" : "rounded-bl-sm"}`}
+              style={{ width: s.width }}
+            />
+          </div>
+        ))}
       </div>
     );
   }
@@ -77,6 +93,7 @@ export function MessageList({
           isOwn={msg.senderId === currentUid}
           otherUid={otherUid}
           onJoinCall={onJoinCall}
+          onMediaLoad={scrollToBottom}
         />
       ))}
       {isTyping && (

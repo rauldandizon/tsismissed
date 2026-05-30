@@ -114,7 +114,7 @@ export function ContactProfileModal({
             <button
               type="button"
               onClick={isBlocked ? onUnblock : () => setConfirmBlock(true)}
-              className={`w-full flex items-center justify-center gap-1.5 py-1.5 text-sm font-medium transition-colors cursor-pointer ${
+              className={`w-full flex items-center justify-center gap-1.5 py-1.5 text-sm font-medium transition-all active:scale-[0.97] cursor-pointer ${
                 isBlocked
                   ? "text-[#2DC653] hover:text-[#2DC653]/80"
                   : "text-red-400 hover:text-red-300"

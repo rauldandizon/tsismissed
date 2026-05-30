@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { X, Download, Share2 } from "lucide-react";
 
 interface ImageViewerProps {
@@ -11,6 +11,7 @@ interface ImageViewerProps {
 export function ImageViewer({ url, onClose }: ImageViewerProps) {
   const [copied, setCopied] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const copyTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   async function handleDownload() {
     setDownloading(true);
@@ -37,7 +38,10 @@ export function ImageViewer({ url, onClose }: ImageViewerProps) {
       if (e.key === "Escape") onClose();
     }
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+    };
   }, [onClose]);
 
   async function handleShare() {
@@ -50,7 +54,8 @@ export function ImageViewer({ url, onClose }: ImageViewerProps) {
     } else {
       await navigator.clipboard.writeText(url);
       setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
+      if (copyTimeoutRef.current) clearTimeout(copyTimeoutRef.current);
+      copyTimeoutRef.current = setTimeout(() => setCopied(false), 2000);
     }
   }
 

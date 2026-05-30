@@ -11,12 +11,17 @@ export default function ChatPage() {
   const { user, loading } = useAuth();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (loading) return;
+    if (!user) {
       router.push("/login");
+      return;
+    }
+    if (user.providerData[0]?.providerId === "password" && !user.emailVerified) {
+      router.push("/verify-email");
     }
   }, [user, loading, router]);
 
-  if (loading || !user) {
+  if (loading || !user || (user.providerData[0]?.providerId === "password" && !user.emailVerified)) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 size={32} className="animate-spin text-blue-600" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { LogOut, Search, X } from "lucide-react";
 import { ThemeLogo } from "@/components/ThemeLogo";
@@ -12,7 +13,10 @@ import { ContactRequestsPanel } from "@/components/ContactRequestsPanel";
 import { ChatHeader } from "@/components/ChatHeader";
 import { MessageList } from "@/components/MessageList";
 import { MessageInput } from "@/components/MessageInput";
-import { CallDialog } from "@/components/CallDialog";
+const CallDialog = dynamic(
+  () => import("@/components/CallDialog").then((m) => ({ default: m.CallDialog })),
+  { ssr: false }
+);
 import { IncomingCallToast } from "@/components/IncomingCallToast";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { EditProfilePanel } from "@/components/EditProfilePanel";
@@ -49,6 +53,7 @@ export function ChatLayout() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
   const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contactsLoading, setContactsLoading] = useState(true);
   const [conversations, setConversations] = useState<Conversation[]>([]);
   const [foreignContacts, setForeignContacts] = useState<Contact[]>([]);
   const [selectedConversationId, setSelectedConversationId] = useState<
@@ -74,7 +79,10 @@ export function ChatLayout() {
 
   useEffect(() => {
     if (!user) return;
-    return subscribeContacts(user.uid, setContacts);
+    return subscribeContacts(user.uid, (c) => {
+      setContacts(c);
+      setContactsLoading(false);
+    });
   }, [user?.uid]);
 
   useEffect(() => {
@@ -322,6 +330,7 @@ export function ChatLayout() {
                 selectedConversationId={selectedConversationId}
                 currentUid={user.uid}
                 onSelect={handleSelectContact}
+                loading={contactsLoading}
               />
             </>
           )}
@@ -335,7 +344,7 @@ export function ChatLayout() {
             onClick={() => setEditProfileOpen(true)}
             title="Edit profile"
             aria-label="Edit profile"
-            className="flex items-center gap-2.5 min-w-0 cursor-pointer hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2.5 min-w-0 cursor-pointer rounded-xl px-2 py-1 -mx-2 -my-1 hover:bg-white/5 transition-colors duration-150 active:scale-[0.97] transition-transform"
           >
             <div className="relative shrink-0">
               <UserAvatar

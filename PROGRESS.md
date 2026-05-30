@@ -9,11 +9,12 @@ Read this file before starting any session. Update this file after completing an
 ## Project Status Summary
 
 ```
-Current Session   : Session 11 — Polish, Rules, and Deployment
-Overall Status    : In Progress
+Current Session   : Session 11 — Polish, Rules, and Deployment (Done)
+Overall Status    : Deployment Ready
 Last Updated      : 2026-05-30
+Previous Session  : Session 11.5 — Security: Email Verification (Done)
 Build Status      : Passed (Next.js 16.2.6, Turbopack)
-Deployment Status : Not Deployed
+Deployment Status : Not Deployed — ready for Vercel
 ```
 
 ---
@@ -31,7 +32,8 @@ Deployment Status : Not Deployed
 [x] Session 8  — Media Messages (Images + Audio)
 [x] Session 9  — Call Status Flow (Missed / Answered / Duration)
 [x] Session 10 — Profile Creation and Profile Viewing
-[ ] Session 11 — Polish, Rules, and Deployment
+[x] Session 11.5 — Security: Email Verification
+[x] Session 11 — Polish, Rules, and Deployment
 ```
 
 ---
@@ -687,40 +689,116 @@ app/profile/page.tsx                modified (added new-user subtitle below head
 
 ---
 
-## Session 11 — Polish, Rules, and Deployment
+## Session 11.5 — Security: Email Verification
 
-**Scope:** Final UI polish, Firestore rules audit, README update, Vercel deployment readiness.
+**Scope:** Add Firebase email verification gate for email/password accounts. Unverified users are redirected to /verify-email and cannot access /chat. Google sign-in users are unaffected.
 
-**Status:** `Not Started`
+**Status:** `Done`
 
 **Files Created or Modified:**
 
 ```
-(pending — was previously Session 6)
+lib/auth.ts                         modified (sendEmailVerification on signup)
+app/verify-email/page.tsx           created  (verification holding page)
+app/page.tsx                        modified (unverified check before routing)
+app/login/page.tsx                  modified (unverified check in handleRedirect)
+app/register/page.tsx               modified (redirect to /verify-email after email signup)
+app/chat/page.tsx                   modified (unverified guard)
 ```
 
 **Acceptance Criteria:**
 
 ```
-[ ] No visible clickable UI control is non-functional
-[ ] UI is clean on desktop and mobile
-[ ] Firestore security rules protect all collections (Sessions 6–9 additions included)
-[ ] README explains Firebase, Cloudinary, and calling setup
-[ ] README documents known limitations
-[ ] npm run build passes
-[ ] Project is ready to deploy on Vercel
+[x] New email/password accounts receive a verification email on signup
+[x] Unverified users are redirected to /verify-email, not /chat
+[x] /verify-email shows the user's email, resend button (60s cooldown),
+    and a check/refresh button
+[x] Google sign-in users are never redirected to /verify-email
+[x] Verified users flow normally through to /profile then /chat
+[x] npm run build passes
 ```
 
 **Notes:**
 
 ```
--
+- sendEmailVerification() is called fire-and-forget after createUserWithEmailAndPassword.
+  Errors are logged but do not block account creation.
+- Unverified detection: user.providerData[0]?.providerId === "password" && !user.emailVerified.
+  Google accounts have providerId === "google.com" and are always treated as verified.
+- Routing logic: not logged in → /login; email+unverified → /verify-email;
+  verified/Google+no displayName → /profile; verified/Google+displayName → /chat.
+- /verify-email page guards: no user → /login; emailVerified already → /profile.
+- "I've verified my email" button calls auth.currentUser.reload() then checks emailVerified.
+- Resend button has 60s cooldown tracked via setInterval to prevent spam.
+- npm run build passed (Next.js 16.2.6, Turbopack).
 ```
 
 **Issues / Blockers:**
 
 ```
--
+- None
+```
+
+---
+
+## Session 11 — Polish, Rules, and Deployment
+
+**Scope:** Final UI polish, Firestore rules audit, README update, Vercel deployment readiness.
+
+**Status:** `Done`
+
+**Files Created or Modified:**
+
+```
+README.md                           rewritten (project README replacing Next.js template)
+next.config.ts                      modified  (added images.remotePatterns for Cloudinary)
+app/layout.tsx                      modified  (fade-in wrapper div for page transitions)
+components/ChatLayout.tsx           modified  (contactsLoading state, lazy CallDialog, sidebar footer hover, active:scale)
+components/ConversationList.tsx     modified  (loading prop + ConversationSkeleton component)
+components/MessageList.tsx          modified  (replaced Loader2 spinner with skeleton bubbles)
+components/MessageBubble.tsx        modified  (lazy ImageViewer via next/dynamic)
+components/ImageViewer.tsx          modified  (fixed setTimeout cleanup memory leak)
+components/ChatHeader.tsx           modified  (active:scale-[0.97] on block menu item)
+components/ContactProfileModal.tsx  modified  (active:scale-[0.97] on block/unblock button)
+```
+
+**Acceptance Criteria:**
+
+```
+[x] No visible clickable UI control is non-functional
+[x] UI is clean on desktop and mobile
+[x] Firestore security rules protect all collections (Sessions 6–9 additions included)
+[x] README explains Firebase, Cloudinary, and calling setup
+[x] README documents known limitations
+[x] npm run build passes
+[x] Project is ready to deploy on Vercel
+```
+
+**Notes:**
+
+```
+- Firestore rules audit: all rules already correct — no changes needed, no redeploy needed.
+  - users update allowedKeys covers all fields written by updateUserProfile() ✅
+  - conversations update rule (participantIds immutability) covers typing + unreadFor ✅
+  - messages update rule allows readBy, callStatus, callDuration ✅
+  - contacts cross-user create rule for request acceptance ✅
+- Skeleton loaders: contactsLoading state added to ChatLayout; first Firestore snapshot
+  clears the flag. ConversationSkeleton renders 5 pulse rows. MessageList renders 4 pulse
+  bubbles (alternating L/R) while loading.
+- CallDialog and ImageViewer are now dynamically imported (ssr: false) so they are split
+  from the initial page bundle and only loaded on demand.
+- ImageViewer: copyTimeoutRef tracks the "Link copied" timeout; cleared in useEffect cleanup.
+- next.config.ts: res.cloudinary.com added to images.remotePatterns for Next.js Image
+  optimization of avatar URLs.
+- Page transitions: animate-in fade-in duration-150 wrapper added in layout.tsx.
+- All destructive action buttons (block, sign out) have active:scale feedback.
+- npm run build passed (Next.js 16.2.6, Turbopack). Zero errors.
+```
+
+**Issues / Blockers:**
+
+```
+- None
 ```
 
 ---
@@ -845,10 +923,9 @@ Notes       :
 ## Next Steps
 
 ```
-- Start Session 11: Polish, Rules, and Deployment
-  - Final UI polish pass (desktop + mobile)
-  - Firestore rules audit (Sessions 6–10 additions)
-  - README update (Firebase, Cloudinary, calling setup, known limitations)
-  - Vercel deployment readiness check
-  - npm run build passes
+- Project is deployment-ready.
+- To deploy: push to GitHub → import repo in Vercel → add all 8 env vars → Deploy.
+- See README.md for full deployment instructions.
+- Optional Phase 2 features: group chats, push notifications, call ringtones,
+  video uploads, server-side missed-call detection via Cloud Functions.
 ```

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Loader2, Eye, EyeOff } from "lucide-react";
+import { type User } from "firebase/auth";
 import { AuthForm } from "@/components/AuthForm";
 import { signInWithEmail, signInWithGoogle } from "@/lib/auth";
 import { createOrUpdateUserDoc, getUserDoc } from "@/lib/firestore";
@@ -16,7 +17,11 @@ export default function LoginPage() {
   const [error, setError] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  async function handleRedirect(uid: string) {
+  async function handleRedirect(uid: string, firebaseUser?: User) {
+    if (firebaseUser?.providerData[0]?.providerId === "password" && !firebaseUser.emailVerified) {
+      router.push("/verify-email");
+      return;
+    }
     const profile = await getUserDoc(uid);
     if (!profile?.displayName) {
       router.push("/profile");
@@ -32,7 +37,7 @@ export default function LoginPage() {
     try {
       const cred = await signInWithEmail(email, password);
       await createOrUpdateUserDoc(cred.user);
-      await handleRedirect(cred.user.uid);
+      await handleRedirect(cred.user.uid, cred.user);
     } catch (err: unknown) {
       setError(err instanceof Error ? friendlyError(err.message) : "Login failed.");
     } finally {
@@ -46,7 +51,7 @@ export default function LoginPage() {
     try {
       const cred = await signInWithGoogle();
       await createOrUpdateUserDoc(cred.user);
-      await handleRedirect(cred.user.uid);
+      await handleRedirect(cred.user.uid, cred.user);
     } catch (err: unknown) {
       console.error("[Google sign-in error]", err);
       setError(err instanceof Error ? friendlyError(err.message) : "Google sign-in failed.");

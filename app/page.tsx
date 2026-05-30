@@ -17,6 +17,10 @@ export default function HomePage() {
       return;
     }
     getUserDoc(user.uid).then((profile) => {
+      if (user.providerData[0]?.providerId === "password" && !user.emailVerified) {
+        router.push("/verify-email");
+        return;
+      }
       if (!profile?.displayName) {
         router.push("/profile");
       } else {

@@ -1,17 +1,23 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { Phone, Video, PhoneMissed } from "lucide-react";
 import type { Timestamp } from "firebase/firestore";
 import type { Message } from "@/types/message";
 import type { CallType } from "@/lib/callProvider";
-import { ImageViewer } from "@/components/ImageViewer";
+
+const ImageViewer = dynamic(
+  () => import("@/components/ImageViewer").then((m) => ({ default: m.ImageViewer })),
+  { ssr: false }
+);
 
 interface MessageBubbleProps {
   message: Message;
   isOwn: boolean;
   otherUid: string;
   onJoinCall?: (callUrl: string, callType: CallType, messageId: string) => void;
+  onMediaLoad?: () => void;
 }
 
 function formatTime(timestamp: Timestamp | null | undefined): string {
@@ -41,7 +47,7 @@ function CallIcon({ callType, missed }: { callType: CallType; missed?: boolean }
   );
 }
 
-export function MessageBubble({ message, isOwn, otherUid, onJoinCall }: MessageBubbleProps) {
+export function MessageBubble({ message, isOwn, otherUid, onJoinCall, onMediaLoad }: MessageBubbleProps) {
   const time = formatTime(message.createdAt);
   const [viewerOpen, setViewerOpen] = useState(false);
 
@@ -116,6 +122,7 @@ export function MessageBubble({ message, isOwn, otherUid, onJoinCall }: MessageB
           <img
             src={message.mediaUrl}
             alt="Image"
+            onLoad={onMediaLoad}
             onClick={() => setViewerOpen(true)}
             className="max-w-[240px] rounded-xl border border-tsismis-border object-cover shadow-md shadow-tsismis-pink/5 cursor-pointer hover:opacity-90 transition-opacity"
           />
@@ -133,6 +140,7 @@ export function MessageBubble({ message, isOwn, otherUid, onJoinCall }: MessageB
         <img
           src={message.mediaUrl}
           alt="Image"
+          onLoad={onMediaLoad}
           onClick={() => setViewerOpen(true)}
           className="max-w-[240px] rounded-xl border border-tsismis-border object-cover shadow-sm cursor-pointer hover:opacity-90 transition-opacity"
         />

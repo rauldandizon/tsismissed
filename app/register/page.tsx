@@ -33,7 +33,7 @@ export default function RegisterPage() {
     try {
       const cred = await signUpWithEmail(email, password);
       await createOrUpdateUserDoc(cred.user);
-      router.push("/profile");
+      router.push("/verify-email");
     } catch (err: unknown) {
       setError(err instanceof Error ? friendlyError(err.message) : "Registration failed.");
     } finally {

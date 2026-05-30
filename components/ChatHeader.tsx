@@ -99,7 +99,7 @@ export function ChatHeader({
                 <button
                   type="button"
                   onClick={isBlocked ? (() => { setMenuOpen(false); onUnblock(); }) : handleBlockClick}
-                  className={`w-full flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm transition-colors hover:bg-white/5 cursor-pointer ${
+                  className={`w-full flex items-center gap-2 whitespace-nowrap px-4 py-2.5 text-sm transition-all active:scale-[0.97] hover:bg-white/5 cursor-pointer ${
                     isBlocked ? "text-[#2DC653]" : "text-red-400"
                   }`}
                 >

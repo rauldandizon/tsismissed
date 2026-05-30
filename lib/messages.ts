@@ -19,17 +19,19 @@ export function subscribeMessages(
   conversationId: string,
   cb: (messages: Message[]) => void
 ): () => void {
+  // desc + limit keeps the window anchored to the newest messages so real-time
+  // updates always land inside the limit. Results are reversed before delivery
+  // so the UI sees oldest-first order.
   const q = query(
     collection(db, "conversations", conversationId, "messages"),
-    orderBy("createdAt", "asc"),
-    limit(100)
+    orderBy("createdAt", "desc"),
+    limit(50)
   );
 
   return onSnapshot(q, (snap) => {
-    const messages = snap.docs.map((d) => ({
-      id: d.id,
-      ...(d.data() as Omit<Message, "id">),
-    }));
+    const messages = snap.docs
+      .map((d) => ({ id: d.id, ...(d.data() as Omit<Message, "id">) }))
+      .reverse();
     cb(messages);
   });
 }

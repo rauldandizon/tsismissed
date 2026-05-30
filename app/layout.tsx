@@ -11,10 +11,6 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "TsisMissed",
   description: "Chika. Chat. Call. Never Missed.",
-  icons: {
-    icon: "/logo.png",
-    apple: "/logo.png",
-  },
 };
 
 export default function RootLayout({
@@ -28,7 +24,11 @@ export default function RootLayout({
       className={`${inter.variable} h-full antialiased font-sans`}
     >
       <body className="min-h-full flex flex-col bg-tsismis-bg text-tsismis-text">
-        <Providers>{children}</Providers>
+        <Providers>
+          <div className="min-h-full flex flex-col animate-in fade-in duration-150">
+            {children}
+          </div>
+        </Providers>
       </body>
     </html>
   );

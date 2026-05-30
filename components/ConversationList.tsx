@@ -13,6 +13,7 @@ interface ConversationListProps {
   selectedConversationId: string | null;
   currentUid: string;
   onSelect: (contact: Contact) => void;
+  loading?: boolean;
 }
 
 function formatPreviewTime(timestamp: Timestamp | null | undefined): string {
@@ -35,13 +36,34 @@ function formatPreviewTime(timestamp: Timestamp | null | undefined): string {
   }
 }
 
+function ConversationSkeleton() {
+  return (
+    <ul className="space-y-0.5 py-2">
+      {[120, 90, 150, 80, 110].map((w, i) => (
+        <li key={i} className="flex items-center gap-3 p-3 mx-2 my-0.5">
+          <div className="w-10 h-10 rounded-full bg-tsismis-border/40 animate-pulse shrink-0" />
+          <div className="flex-1 space-y-2">
+            <div className={`h-3 rounded bg-tsismis-border/40 animate-pulse`} style={{ width: w }} />
+            <div className="h-2.5 rounded bg-tsismis-border/30 animate-pulse w-[60px]" />
+          </div>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
 export function ConversationList({
   contacts,
   conversationMap,
   selectedConversationId,
   currentUid,
   onSelect,
+  loading,
 }: ConversationListProps) {
+  if (loading) {
+    return <ConversationSkeleton />;
+  }
+
   if (contacts.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center px-6 py-12 text-center select-none">
@@ -77,10 +99,7 @@ export function ConversationList({
         const conversation = conversationMap.get(conversationId);
         const isSelected = selectedConversationId === conversationId;
 
-        const subtitle =
-          conversation?.lastMessage?.trim() ||
-          contact.bio?.trim() ||
-          contact.email;
+        const lastMessage = conversation?.lastMessage?.trim() || null;
 
         const previewTime = formatPreviewTime(conversation?.lastMessageAt);
         const unreadCount = conversation?.unreadFor?.[currentUid] ?? 0;
@@ -118,8 +137,14 @@ export function ConversationList({
                   )}
                 </div>
               </div>
-              <p className={`text-xs truncate mt-0.5 ${unreadCount > 0 ? "text-tsismis-text font-medium" : "text-tsismis-muted"}`}>
-                {subtitle}
+              <p className="text-xs truncate mt-0.5">
+                {lastMessage ? (
+                  <span className={unreadCount > 0 ? "text-tsismis-text font-medium" : "text-tsismis-muted"}>
+                    {lastMessage}
+                  </span>
+                ) : (
+                  <span className="text-tsismis-hint italic">Say hi!</span>
+                )}
               </p>
             </div>
           </li>
