@@ -81,6 +81,40 @@ export function subscribeLatestMessages(
   });
 }
 
+export async function sendMediaMessage(
+  conversationId: string,
+  senderId: string,
+  receiverId: string,
+  type: "image" | "audio",
+  mediaUrl: string,
+  mediaPublicId: string,
+  mediaMimeType: string
+): Promise<void> {
+  await addDoc(
+    collection(db, "conversations", conversationId, "messages"),
+    {
+      senderId,
+      receiverId,
+      type,
+      mediaUrl,
+      mediaPublicId,
+      mediaMimeType,
+      createdAt: serverTimestamp(),
+      readBy: [senderId],
+    }
+  );
+
+  const lastMessage = type === "image" ? "📷 Photo" : "🎵 Audio clip";
+
+  await updateDoc(doc(db, "conversations", conversationId), {
+    lastMessage,
+    lastMessageType: "text",
+    lastMessageAt: serverTimestamp(),
+    updatedAt: serverTimestamp(),
+    [`unreadFor.${receiverId}`]: increment(1),
+  });
+}
+
 export async function markMessagesAsRead(
   conversationId: string,
   messages: Message[],

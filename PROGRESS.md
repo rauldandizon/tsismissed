@@ -9,7 +9,7 @@ Read this file before starting any session. Update this file after completing an
 ## Project Status Summary
 
 ```
-Current Session   : Session 8 — Media Messages (Images + Audio)
+Current Session   : Session 9 — Call Status Flow (Missed / Answered / Duration)
 Overall Status    : In Progress
 Last Updated      : 2026-05-30
 Build Status      : Passed (Next.js 16.2.6, Turbopack)
@@ -28,7 +28,7 @@ Deployment Status : Not Deployed
 [x] Session 5  — Calling Feature
 [x] Session 6  — Unread Counter + Typing Indicator + Emoji
 [x] Session 7  — Contact Requests + Block User
-[ ] Session 8  — Media Messages (Images + Audio)
+[x] Session 8  — Media Messages (Images + Audio)
 [ ] Session 9  — Call Status Flow (Missed / Answered / Duration)
 [ ] Session 10 — Polish, Rules, and Deployment
 ```
@@ -503,26 +503,36 @@ components/ChatLayout.tsx           modified (subscribed to requests/blocks, wir
 
 **Scope:** Users can send images (JPG, PNG, WebP ≤5 MB) and audio clips (MP3, M4A, WebM ≤15 MB) via Cloudinary. Video deferred to Phase 2.
 
-**Status:** `Not Started`
+**Status:** `Done`
 
 **Files Created or Modified:**
 
 ```
-(pending)
+types/message.ts                    modified (added "image"|"audio" type, mediaUrl/mediaPublicId/mediaMimeType fields)
+firestore.rules                     modified (extended isValidMessage for image/audio types)
+lib/cloudinary.ts                   modified (added uploadMedia, getCloudinaryResourceType)
+lib/messages.ts                     modified (added sendMediaMessage)
+components/MessageBubble.tsx        modified (added image and audio rendering branches; click-to-open image viewer)
+components/MessageInput.tsx         modified (split attachment menu image/audio, drag-and-drop, validation, progress UI)
+components/ImageViewer.tsx          created (full-screen image viewer with download and share)
 ```
 
 **Acceptance Criteria:**
 
 ```
-[ ] Users can attach and send images
-[ ] Users can attach and send audio clips
-[ ] Files are uploaded to Cloudinary before message is sent
-[ ] Only Cloudinary URL + metadata stored in Firestore (no base64)
-[ ] Image messages render inline in the chat bubble
-[ ] Audio messages render with a native audio player
-[ ] File type and size validated client-side before upload
-[ ] Upload progress shown during upload
-[ ] npm run build passes
+[x] Users can attach and send images (JPG, PNG, WebP ≤ 5 MB)
+[x] Users can attach and send audio clips (MP3, M4A, WebM ≤ 15 MB)
+[x] Files are uploaded to Cloudinary before message is sent
+[x] Only Cloudinary URL + metadata stored in Firestore (no base64)
+[x] Image messages render inline in the chat bubble
+[x] Audio messages render with a native audio player
+[x] File type and size validated client-side before upload
+[x] Upload progress shown during upload
+[x] Clicking an image opens a full-screen viewer
+[x] Image viewer has Download and Share actions
+[x] Paperclip shows a menu with separate Image and Audio options
+[x] Dragging a file over the chat area shows a drop overlay and uploads on drop
+[x] npm run build passes
 ```
 
 **Notes:**
@@ -530,13 +540,27 @@ components/ChatLayout.tsx           modified (subscribed to requests/blocks, wir
 ```
 - Video upload is Phase 2 (free-tier upload size risk).
 - Uses existing NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME and NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET.
+  Cloudinary upload preset must be Unsigned and resource type Auto (to support both image
+  and audio/video uploads from the same preset).
 - Audio upload uses /video/upload endpoint (Cloudinary treats audio as video resource_type).
+- uploadMedia() uses XMLHttpRequest (not fetch) to support upload progress events.
+- Progress bar replaces the textarea row during upload; normal UI restores on completion.
+- Attachment button is hidden when the conversation is disabled (blocked/non-contact).
+- ImageViewer download uses fetch-to-blob + temporary object URL to force save dialog
+  (the <a download> attribute is ignored for cross-origin URLs).
+- ImageViewer share uses Web Share API on mobile; falls back to clipboard copy on desktop.
+- Drag-and-drop: document-level dragenter listener in MessageInput shows a fullscreen overlay.
+  No prop threading needed — processFile() is self-contained in MessageInput.
+- Image picker uses capture="environment" so mobile users get a camera option.
+- Audio recorder deferred to Phase 2 (requires MediaRecorder, recording state, live preview).
+- Firestore rules deployed successfully after update.
+- npm run build passed (Next.js 16.2.6, Turbopack).
 ```
 
 **Issues / Blockers:**
 
 ```
--
+- None
 ```
 
 ---
