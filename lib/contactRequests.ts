@@ -11,8 +11,9 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db } from "./firebase";
-import { addContactByUid } from "./contacts";
+import { addContact } from "./contacts";
 import type { ContactRequest } from "@/types/contactRequest";
+import type { UserProfile } from "@/types/user";
 
 export async function sendContactRequest(
   fromUid: string,
@@ -46,10 +47,31 @@ export async function getOutgoingRequestStatus(
 
 export async function acceptContactRequest(
   currentUid: string,
+  currentProfile: Pick<UserProfile, "uid" | "displayName" | "email" | "photoURL" | "bio">,
   request: ContactRequest
 ): Promise<void> {
-  await addContactByUid(currentUid, request.fromUid);
-  await addContactByUid(request.fromUid, currentUid);
+  // Build both contact records from data we already hold — the request carries
+  // the sender's denormalized profile, and the current user's profile is passed
+  // in. Avoids re-reading user docs (which previously threw "User not found"
+  // when a user doc was missing or a read came back stale).
+  await addContact(currentUid, {
+    uid: request.fromUid,
+    displayName: request.fromDisplayName,
+    email: request.fromEmail,
+    photoURL: request.fromPhotoURL,
+    bio: request.fromBio,
+  } as UserProfile);
+
+  // Add the current user into the sender's contacts. This cross-user write is
+  // only permitted while the request doc still exists, so do it BEFORE delete.
+  await addContact(request.fromUid, {
+    uid: currentProfile.uid,
+    displayName: currentProfile.displayName,
+    email: currentProfile.email,
+    photoURL: currentProfile.photoURL,
+    bio: currentProfile.bio,
+  } as UserProfile);
+
   await deleteDoc(doc(db, "users", currentUid, "contactRequests", request.fromUid));
 }
 

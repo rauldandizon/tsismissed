@@ -320,7 +320,17 @@ export function ChatLayout() {
 
   async function handleAcceptRequest(request: ContactRequest) {
     if (!user) return;
-    await acceptContactRequest(user.uid, request);
+    await acceptContactRequest(
+      user.uid,
+      {
+        uid: user.uid,
+        displayName: userProfile?.displayName ?? user.displayName ?? "",
+        email: userProfile?.email ?? user.email ?? "",
+        photoURL: userProfile?.photoURL ?? user.photoURL ?? "",
+        bio: userProfile?.bio ?? "",
+      },
+      request
+    );
   }
 
   async function handleDeclineRequest(request: ContactRequest) {
