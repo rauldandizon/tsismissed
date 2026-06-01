@@ -40,6 +40,9 @@ export function CallDialog({
   const missedTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Always reflects the latest Firestore callStatus for this message
   const liveStatusRef = useRef<string | undefined>(undefined);
+  // True once the call was ever answered (by either side). Once set, the call
+  // can never be reported as "missed" — it had a real connection.
+  const everAnsweredRef = useRef(false);
 
   // Subscribe to live call status so the caller knows when receiver answers
   useEffect(() => {
@@ -50,6 +53,12 @@ export function CallDialog({
       (snap) => {
         const status = snap.data()?.callStatus as string | undefined;
         liveStatusRef.current = status;
+
+        // "answered" or "ended" both mean the call had a real connection.
+        // (Snapshots can coalesce pending→ended, skipping "answered".)
+        if (status === "answered" || status === "ended") {
+          everAnsweredRef.current = true;
+        }
 
         if (mode === "caller" && status === "answered") {
           // Receiver joined — cancel the missed timer and start duration tracking
@@ -75,8 +84,11 @@ export function CallDialog({
       // joinedAtRef is NOT set here — only set when subscription sees "answered"
 
       missedTimerRef.current = setTimeout(() => {
-        // Only write "missed" if receiver still hasn't answered
-        if (!liveStatusRef.current || liveStatusRef.current === "pending") {
+        // Only write "missed" if the call was never answered by either side.
+        if (
+          !everAnsweredRef.current &&
+          (!liveStatusRef.current || liveStatusRef.current === "pending")
+        ) {
           updateCallMessage(conversationId, messageId, {
             callStatus: "missed",
           }).catch(() => {});
@@ -126,17 +138,20 @@ export function CallDialog({
 
     const status = liveStatusRef.current;
 
-    // Skip update if Firestore already has a terminal status
-    if (status !== "ended" && status !== "missed") {
+    // "ended" is the only immutable terminal status (the duration is already
+    // recorded). A stale "missed" CAN be corrected: if this side actually
+    // connected, the call was real and must end as "ended" with a duration.
+    if (status !== "ended") {
       if (joinedAtRef.current !== null) {
-        // Call was answered — record duration
+        // This side participated — record duration, overwriting any premature
+        // "missed" written by the 60s timer before the call connected.
         const duration = Math.round((Date.now() - joinedAtRef.current) / 1000);
         updateCallMessage(conversationId, messageId, {
           callStatus: "ended",
           callDuration: duration,
         }).catch(() => {});
-      } else {
-        // Caller closing before receiver answered, or receiver closing without joining
+      } else if (status !== "missed") {
+        // Never connected on this side and not already missed → mark missed.
         updateCallMessage(conversationId, messageId, {
           callStatus: "missed",
         }).catch(() => {});
@@ -147,6 +162,7 @@ export function CallDialog({
     setJoined(false);
     joinedAtRef.current = null;
     liveStatusRef.current = undefined;
+    everAnsweredRef.current = false;
     onClose();
   }
 
